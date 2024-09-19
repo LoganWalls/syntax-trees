@@ -1,0 +1,18 @@
+[package]
+name = "syntax-trees"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.89"
+console_error_panic_hook = "0.1.7"
+console_log = "1.0.0"
+leptos = { version = "0.6.15", features = ["csr"] }
+log = "0.4.22"
+nom = "7.1.3"
+
+[dev-dependencies]
+wasm-bindgen = "0.2.93"
+web-sys = "0.3.70"
