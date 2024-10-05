@@ -8,7 +8,7 @@ use self::parser::parse_syntax_tree;
 use web_sys::HtmlDivElement;
 
 const DEFAULT_SRC: &str = r#"
-[S 
+[S
   [NP [N Ash] ]
   [VP
     [V caught]
@@ -88,7 +88,7 @@ pub fn SyntaxTreeNodeRender(node: tree::Node) -> impl IntoView {
                         y2=right_y + child_offset_y
                         class="stroke-slate-900"
                     />
-                    {__SyntaxTreeNodeRender(right)}
+                    <SyntaxTreeNodeRender node=right />
                     <line
                         x1=x - offset_x
                         x2=left_x + offset_x
@@ -96,7 +96,7 @@ pub fn SyntaxTreeNodeRender(node: tree::Node) -> impl IntoView {
                         y2=left_y + child_offset_y
                         class="stroke-slate-900"
                     />
-                    {__SyntaxTreeNodeRender(left)}
+                    <SyntaxTreeNodeRender node=left />
                 }
             } else {
                 view! {
@@ -107,7 +107,7 @@ pub fn SyntaxTreeNodeRender(node: tree::Node) -> impl IntoView {
                         y2=left_y + child_offset_y
                         class="stroke-slate-900"
                     />
-                    {__SyntaxTreeNodeRender(left)}
+                    <SyntaxTreeNodeRender node=left />
                 }
             }
             .into_view()

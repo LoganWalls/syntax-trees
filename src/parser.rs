@@ -12,26 +12,26 @@ fn node_content(input: &str) -> IResult<&str, &str> {
 
 pub fn parse_node(input: &str) -> IResult<&str, Node> {
     let (remaining, _) = (multispace0, tag("["), multispace0).parse(input)?;
-    let (mut remaining, category) = delimited(multispace0, node_content, multispace0)(remaining)?;
+    let (remaining, category) = delimited(multispace0, node_content, multispace0)(remaining)?;
 
-    let kind;
-    if let Ok((r, label)) = node_content(remaining) {
-        remaining = r;
-        kind = Box::new(NodeKind::Leaf {
-            label: label.to_string(),
-        });
+    let (remaining, kind) = if let Ok((r, label)) = node_content(remaining) {
+        (
+            r,
+            NodeKind::Leaf {
+                label: label.to_string(),
+            },
+        )
     } else {
         let (r, (left, right)) = pair(parse_node, opt(parse_node))(remaining)?;
-        remaining = r;
-        kind = Box::new(NodeKind::Subtree { left, right });
-    }
+        (r, NodeKind::Subtree { left, right })
+    };
 
     let (remaining, _) = (multispace0, tag("]")).parse(remaining)?;
     Ok((
         remaining,
         Node {
             category: category.to_string(),
-            kind,
+            kind: Box::new(kind),
             x: 0.0,
             y: 0.0,
         },
