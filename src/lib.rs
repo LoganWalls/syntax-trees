@@ -38,20 +38,17 @@ pub fn CodeEditor(src: RwSignal<String>, tree: Signal<Option<SyntaxTree>>) -> im
     };
 
     view! {
-        <div class="relative flex basis-1/3 grow h-fit">
-            <pre class="relative min-w-[45em] max-w-[60em] min-h-40 z-10 px-4 py-2 overflow-x-scroll  bg-slate-700 dark:bg-slate-900 rounded-md">
-                <div
-                    contenteditable="true"
-                    spellcheck="false"
-
-                    class="px-4 py-2 absolute size-full top-0 left-0 bg-transparent text-transparent cursor-text whitespace-pre focus:outline-none overflow-visible caret-slate-500 dark:caret-slate-200"
-                    on:input=move |ev| { src.set(event_target::<HtmlDivElement>(&ev).inner_text()) }
-                >
-                    {src.get_untracked()}
-                </div>
-                <code class="select-none size-full">{src_html}</code>
+        <pre class="relative min-w-[45em] min-h-40 sm:w-[80%] xl:h-[80%] z-10 px-4 py-2 overflow-x-scroll  bg-slate-700 dark:bg-slate-900 rounded-md">
+            <pre
+                contenteditable="true"
+                spellcheck="false"
+                class="px-4 py-2 absolute size-full top-0 left-0 bg-transparent text-transparent cursor-text whitespace-pre focus:outline-none overflow-visible caret-slate-500 dark:caret-slate-200"
+                on:input=move |ev| { src.set(event_target::<HtmlDivElement>(&ev).inner_text()) }
+            >
+                {src.get_untracked()}
             </pre>
-        </div>
+            <code class="select-none size-full">{src_html}</code>
+        </pre>
     }
 }
 
@@ -135,7 +132,7 @@ pub fn SyntaxTreeRender(tree: Signal<Option<SyntaxTree>>) -> impl IntoView {
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
                     fill="currentColor"
-                    class="size-6"
+                    class="size-0"
                 >
                     <path
                         fill-rule="evenodd"
@@ -148,12 +145,10 @@ pub fn SyntaxTreeRender(tree: Signal<Option<SyntaxTree>>) -> impl IntoView {
         }
     };
     view! {
-        <div class="h-fit max-h-full flex basis-2/3 shrink">
-            <svg class="w-full h-auto" viewBox="0 0 1000 1000">
-                {tree_root}
-                Sorry but this browser does not support inline SVG.
-            </svg>
-        </div>
+        <svg class="w-full h-full" viewBox="0 0 1000 1000">
+            {tree_root}
+            Sorry but this browser does not support inline SVG.
+        </svg>
     }
 }
 
@@ -163,9 +158,13 @@ pub fn App() -> impl IntoView {
     let tree = Signal::derive(move || parse_syntax_tree(&src.get()).map(|(_, tree)| tree).ok());
 
     view! {
-        <div class="size-full flex flex-row place-items-top">
-            <SyntaxTreeRender tree=tree />
-            <CodeEditor src=src tree=tree />
+        <div class="size-full flex xl:flex-row sm:flex-col place-items-top">
+            <div class="flex basis-1/3 grow sm:flex-row xl:flex-col justify-center">
+                <CodeEditor src=src tree=tree />
+            </div>
+            <div class="flex basis-2/3 shrink aspect-video xl:h-screen sm:w-screen">
+                <SyntaxTreeRender tree=tree />
+            </div>
         </div>
     }
 }
