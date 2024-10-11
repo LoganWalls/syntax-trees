@@ -4,36 +4,47 @@ use nom::combinator::opt;
 use nom::sequence::{delimited, pair, Tuple};
 use nom::IResult;
 
-use crate::tree::{Node, NodeKind, SyntaxTree};
+use crate::tree::{Node, NodeKind, SyntaxTree, Token};
 
 fn node_content(input: &str) -> IResult<&str, &str> {
     is_not(" \t\r\n[]")(input)
 }
 
 pub fn parse_node(input: &str) -> IResult<&str, Node> {
-    let (remaining, _) = (multispace0, tag("["), multispace0).parse(input)?;
-    let (remaining, category) = delimited(multispace0, node_content, multispace0)(remaining)?;
+    let (remaining, (node_prefix, _, category_prefix)) =
+        (multispace0, tag("["), multispace0).parse(input)?;
+    let (remaining, (category, category_suffix)) = (node_content, multispace0).parse(remaining)?;
 
-    let (remaining, kind) = if let Ok((r, label)) = node_content(remaining) {
-        (
-            r,
-            NodeKind::Leaf {
-                label: label.to_string(),
-            },
-        )
-    } else {
-        let (r, (left, right)) = pair(parse_node, opt(parse_node))(remaining)?;
-        (r, NodeKind::Subtree { left, right })
-    };
+    let (remaining, kind) =
+        if let Ok((r, (label, label_suffix))) = (node_content, multispace0).parse(remaining) {
+            (
+                r,
+                NodeKind::Leaf {
+                    label: Token {
+                        prefix: String::new(),
+                        suffix: label_suffix.to_owned(),
+                        value: label.to_string(),
+                    },
+                },
+            )
+        } else {
+            let (r, (left, right)) = pair(parse_node, opt(parse_node))(remaining)?;
+            (r, NodeKind::Subtree { left, right })
+        };
 
-    let (remaining, _) = (multispace0, tag("]")).parse(remaining)?;
+    let (remaining, (.., node_suffix)) = (multispace0, tag("]"), multispace0).parse(remaining)?;
     Ok((
         remaining,
         Node {
-            category: category.to_string(),
+            category: Token {
+                prefix: category_prefix.to_owned(),
+                suffix: category_suffix.to_owned(),
+                value: category.to_string(),
+            },
             kind: Box::new(kind),
             x: 0.0,
             y: 0.0,
+            whitespace: (node_prefix.to_owned(), node_suffix.to_owned()),
         },
     ))
 }
